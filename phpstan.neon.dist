@@ -1,0 +1,13 @@
+parameters:
+    level: max
+
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+
+    paths:
+        - /source
+    bootstrapFiles:
+        - phar:///pocketmine/PocketMine-MP.phar/vendor/autoload.php
+    scanDirectories:
+        - /source
+        - /source/vendor/gameapi

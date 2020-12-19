@@ -1,0 +1,41 @@
+name: DeathRun CI
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, '[Build]')"
+
+    steps:
+      - name: Startup
+        uses: actions/checkout@v2
+      - name: Create Vendor Directory
+        run: |
+          echo Making directory...
+          mkdir vendor
+          echo Directory made.
+      # Checkout CosmoCraft-Team/PharBuilder
+      - name: Checkout PharBuilder
+        uses: actions/checkout@v2
+        with:
+          repository: CosmoCraft-Team/PharBuilder
+          token: ${{ secrets.gameapi_token }}
+          path: vendor/PharBuilder
+      - name: Checkout gameapi
+        uses: actions/checkout@v2
+        with:
+          repository: CosmoCraft-Team/gameapi
+          token: ${{ secrets.gameapi_token }}
+          path: src/gameapi
+      - name: Build
+        run: |
+          echo Building...
+          chmod +x vendor/PharBuilder/BuildScript.php
+          php -dphar.readonly=0 vendor/PharBuilder/BuildScript.php --make "" --out vendor/PharBuilder/DeathRun.phar
+          echo Build completed!
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: Builder
+          path: vendor/PharBuilder/DeathRun.phar
