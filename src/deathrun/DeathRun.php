@@ -6,6 +6,7 @@ namespace deathrun;
 
 use deathrun\arena\Arena as CustomArena;
 use deathrun\arena\Level as CustomLevel;
+use deathrun\player\Player as CustomPlayer;
 use gameapi\arena\Arena;
 use gameapi\arena\Level;
 use gameapi\Game;
@@ -41,7 +42,7 @@ class DeathRun extends Game {
      * @return Player
      */
     public function generateNewPlayer(string $name, Arena $arena): Player {
-        return new Player($name, $arena);
+        return new CustomPlayer($name, $arena);
     }
 
     /**
