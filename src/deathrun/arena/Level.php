@@ -8,7 +8,6 @@ use Exception;
 use gameapi\math\GameLocation;
 use gameapi\math\GameVector3;
 use pocketmine\level\Level as pocketLevel;
-use pocketmine\level\Location;
 use pocketmine\math\Vector3;
 
 class Level extends \gameapi\arena\Level {
@@ -39,10 +38,14 @@ class Level extends \gameapi\arena\Level {
     /**
      * @param int $slot
      * @param int $type
-     * @param Location $loc
+     * @param Vector3 $loc
      */
-    public function addTrapPosition(int $slot, int $type, Location $loc): void {
-        $this->data['traps'][$slot][$type] = GameVector3::toArray($loc);
+    public function addTrapPosition(int $slot, int $type, Vector3 $loc): void {
+        $data = GameVector3::toArray($loc);
+
+        if (empty($data['yaw'])) $data = array_merge($data, ['yaw' => 0, 'pitch' => 0]);
+
+        $this->data['traps'][$slot][$type] = $data;
     }
 
     /**
@@ -74,7 +77,7 @@ class Level extends \gameapi\arena\Level {
      * @return GameLocation
      * @throws Exception
      */
-    public function getTrapInteractPosition(int $slot, pocketLevel $level): GameLocation {
+    public function getTrapperSpawn(int $slot, pocketLevel $level): GameLocation {
         return $this->getTrapPosition($slot, 1, $level);
     }
 }

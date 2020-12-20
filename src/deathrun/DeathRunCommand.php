@@ -60,7 +60,7 @@ class DeathRunCommand extends Command {
             ];
 
             Server::getInstance()->getAsyncPool()->submitTask(new FileCopyAsyncTask(Server::getInstance()->getDataPath() . '/worlds/' . $data['folderName'], DeathRun::getInstance()->getDataFolder() . '/arenas/' . $data['folderName'], function () use ($player, $data) {
-                DeathRun::getLevelFactory()->saveLevel(DeathRun::getLevelFactory()->loadLevel($data));
+                DeathRun::getLevelFactory()->loadLevel($data)->handleUpdate();
 
                 $player->sendMessage(TextFormat::GREEN . 'Successfully created ' . $data['folderName']);
             }));
@@ -89,9 +89,9 @@ class DeathRunCommand extends Command {
 
             $level->addSlotPosition(1, ($loc = $player->getLocation()));
 
-            $player->sendMessage(TextFormat::BLUE . 'Spawn set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ() . ' §6Yaw:§b ' . $loc->getYaw() . ' §6Pitch:§b ' . $loc->getPitch());
+            $level->handleUpdate();
 
-            DeathRun::getLevelFactory()->saveLevel($level);
+            $player->sendMessage(TextFormat::BLUE . 'Spawn set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ() . ' §6Yaw:§b ' . $loc->getYaw() . ' §6Pitch:§b ' . $loc->getPitch());
 
             return;
         }
@@ -124,23 +124,21 @@ class DeathRunCommand extends Command {
 
             $level->addCheckpointPosition((int) $args[1], ($loc = $player->getLocation()));
 
-            $player->sendMessage(TextFormat::BLUE . 'Checkpoint ' . $args[1] . ' set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ() . ' §6Yaw:§b ' . $loc->getYaw() . ' §6Pitch:§b ' . $loc->getPitch());
+            $level->handleUpdate();
 
-            DeathRun::getLevelFactory()->saveLevel($level);
+            $player->sendMessage(TextFormat::BLUE . 'Checkpoint ' . $args[1] . ' set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ() . ' §6Yaw:§b ' . $loc->getYaw() . ' §6Pitch:§b ' . $loc->getPitch());
 
             return;
         }
 
         if ($args[0] == 'trap') {
             if (!isset($args[1])) {
-                $player->sendMessage(TextFormat::RED . '/' . $this->getName() . ' checkpoint <slot>');
+                $player->sendMessage(TextFormat::RED . '/' . $this->getName() . ' trap <slot>');
 
                 return;
             }
 
-            $worldLevel = $player->getLevel();
-
-            if ($worldLevel == null) return;
+            $worldLevel = $player->getLevelNonNull();
 
             if ($worldLevel === Server::getInstance()->getDefaultLevel()) {
                 $player->sendMessage(TextFormat::RED . 'You can\'t setup maps in the lobby.');
@@ -153,6 +151,10 @@ class DeathRunCommand extends Command {
 
                 return;
             }
+
+            Utils::addPlayer($player->getName(), (int) $args[1]);
+
+            $player->sendMessage(TextFormat::GREEN . 'Touch the trapper spawn');
         }
     }
 }
