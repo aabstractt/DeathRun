@@ -15,7 +15,7 @@ use gameapi\provider\TargetOffline;
 class DeathRun extends Game {
 
     public function registerClasses(): void {
-        // TODO: Implement registerClasses() method.
+        $this->getServer()->getCommandMap()->register(DeathRunCommand::class, new DeathRunCommand());
     }
 
     /**
