@@ -24,6 +24,13 @@ class Player extends mainPlayer {
     }
 
     /**
+     * @return int
+     */
+    public function getSlot(): int {
+        return $this->isRunner() ? 1 : 2;
+    }
+
+    /**
      * @return bool
      */
     public function isRunner(): bool {
@@ -41,10 +48,6 @@ class Player extends mainPlayer {
      * @param bool $teleport
      */
     public function setDefaultPlayerAttributes(bool $teleport = false): void {
-        if ($this->getArena()->getTrapper() == null) {
-            $this->setRunning();
-        }
-
         parent::setDefaultPlayerAttributes($teleport);
     }
 }

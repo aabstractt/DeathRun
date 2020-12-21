@@ -6,7 +6,7 @@ namespace deathrun;
 
 use deathrun\arena\Arena as CustomArena;
 use deathrun\arena\Level as CustomLevel;
-use deathrun\listener\PlayerInteractListener;
+use deathrun\listener\BlockBreakListener;
 use deathrun\listener\PlayerQuitListener;
 use deathrun\player\Player as CustomPlayer;
 use gameapi\arena\Arena;
@@ -18,7 +18,7 @@ use gameapi\provider\TargetOffline;
 class DeathRun extends Game {
 
     public function registerClasses(): void {
-        $this->registerListener(new PlayerInteractListener(), new PlayerQuitListener());
+        $this->registerListener(new BlockBreakListener(), new PlayerQuitListener());
 
         $this->getServer()->getCommandMap()->register(DeathRunCommand::class, new DeathRunCommand());
     }
@@ -36,7 +36,7 @@ class DeathRun extends Game {
      * @param array $data
      * @return CustomLevel
      */
-    public function generateNewLevel(array $data): CustomLevel {
+    public function generateNewLevel(array $data): Level {
         return new CustomLevel($data);
     }
 

@@ -25,6 +25,24 @@ class Arena extends \gameapi\arena\Arena {
         return 1;
     }
 
+    /**
+     * @param bool $started
+     */
+    public function start(bool $started = true): void {
+        if (!$started) {
+            /** @var Player|null $player */
+            $player = $this->getPlayer(array_rand($this->getPlayers()));
+
+            if ($player != null) {
+                $player->setRunning();
+
+                $player->setImmobile();
+            }
+        }
+
+        parent::start($started);
+    }
+
     public function startGame(): void {
         // TODO: Implement startGame() method.
     }
