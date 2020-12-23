@@ -30,13 +30,13 @@ class GameMatchUpdateTask extends GameUpdateTask {
 
         $players = $arena->getPlayers();
 
-        if (count($arena->getAllPlayers()) <= 1) {
+        /*if (count($arena->getAllPlayers()) <= 1) {
             $this->cancel();
 
             $arena->finish($players);
 
             return;
-        }
+        }*/
 
         $this->handleUpdateScoreboard();
 

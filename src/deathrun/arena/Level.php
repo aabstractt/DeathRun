@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace deathrun\arena;
 
+use deathrun\DeathRun;
 use Exception;
 use gameapi\math\GameLocation;
 use gameapi\math\GamePosition;
 use gameapi\math\GameVector3;
+use pocketmine\block\Block;
 use pocketmine\level\Level as pocketLevel;
 use pocketmine\math\Vector3;
+use pocketmine\scheduler\ClosureTask;
 
 class Level extends \gameapi\arena\Level {
 
@@ -24,7 +27,7 @@ class Level extends \gameapi\arena\Level {
             return parent::getSlotPosition($slot, $level);
         }
 
-        return $this->getTrapperSpawn($slot, $level);
+        return $this->getTrapperSpawn(1, $level);
     }
 
     /**
@@ -101,5 +104,42 @@ class Level extends \gameapi\arena\Level {
      */
     public function getTrapperSpawn(int $slot, pocketLevel $level): GameLocation {
         return $this->getTrapPosition($slot, 1, $level);
+    }
+
+    /**
+     * @param pocketLevel $world
+     * @param int $trapSlot
+     * @throws Exception
+     */
+    public function removeBlocks(pocketLevel $world, int $trapSlot): void {
+        $pos1 = $this->getTrapPosition($trapSlot, 2, $world);
+        $pos2 = $this->getTrapPosition($trapSlot, 3, $world);
+
+        /** @var array<string, Block> $data */
+        $data = [];
+
+        for ($x = min($pos1->getX(), $pos2->getX()); $x < max($pos1->getX(), $pos2->getX()); ++$x) {
+            for ($y = min($pos1->getY(), $pos2->getY()); $y < max($pos1->getY(), $pos2->getY()); ++$y) {
+                for ($z = min($pos1->getZ(), $pos2->getZ()); $z < max($pos1->getZ(), $pos2->getZ()); ++$z) {
+                    $block = $world->getBlockAt($x, $y, $z);
+
+                    //if ($block->getId() !== Block::HARDENED_CLAY) continue;
+                    if ($block->getDamage() != 14) continue;
+
+
+                    $data[$x . ':' . $y . ':' . $z] = clone $block;
+
+                    $world->setBlockIdAt($x, $y, $z, 0);
+                }
+            }
+        }
+
+        DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use($data) : void {
+            foreach ($data as $k => $v) {
+                list($x, $y, $z) = explode(':', $k);
+
+                $v->getLevelNonNull()->setBlockIdAt((int) $x, (int) $y, (int) $z, $v->getId());
+            }
+        }), 8 * 10);
     }
 }

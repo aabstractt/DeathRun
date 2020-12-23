@@ -7,10 +7,15 @@ namespace deathrun\arena;
 use deathrun\arena\task\GameMatchUpdateTask;
 use deathrun\player\Player;
 use gameapi\arena\Level;
+use gameapi\arena\task\GameCountDownUpdateTask;
 use pocketmine\item\Item;
 use pocketmine\utils\TextFormat;
 
 class Arena extends \gameapi\arena\Arena {
+
+    public function bootGame(): void {
+        $this->scheduleRepeatingTask(new GameCountDownUpdateTask('game_count_down_update', $this, 5, 10, 15));
+    }
 
     /**
      * @return \deathrun\arena\Level
@@ -71,6 +76,8 @@ class Arena extends \gameapi\arena\Arena {
     }
 
     public function startGame(): void {
+        $this->getTrapper()->setImmobile(false);
+
         $this->scheduleRepeatingTask(new GameMatchUpdateTask('game_match_update', $this));
     }
 
