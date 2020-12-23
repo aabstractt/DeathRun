@@ -18,6 +18,10 @@ class BlockBreakListener implements Listener {
     public function onBlockBreakEvent(BlockBreakEvent $ev): void {
         $player = $ev->getPlayer();
 
+        if (!Utils::inTrapStep($player->getName())) return;
+
         Utils::handleTrapStep($player, $ev->getBlock()->asPosition());
+
+        $ev->setCancelled();
     }
 }

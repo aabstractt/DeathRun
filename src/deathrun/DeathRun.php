@@ -9,6 +9,8 @@ use deathrun\arena\Level as CustomLevel;
 use deathrun\listener\BlockBreakListener;
 use deathrun\listener\PlayerQuitListener;
 use deathrun\player\Player as CustomPlayer;
+use deathrun\provider\MysqlProvider;
+use deathrun\provider\TargetOffline as CustomTargetOffline;
 use gameapi\arena\Arena;
 use gameapi\arena\Level;
 use gameapi\Game;
@@ -17,7 +19,12 @@ use gameapi\provider\TargetOffline;
 
 class DeathRun extends Game {
 
+    /**
+     * @throws \Exception
+     */
     public function registerClasses(): void {
+        $this->provider = new MysqlProvider($this->getConfig()->get('mysql'));
+
         $this->registerListener(new BlockBreakListener(), new PlayerQuitListener());
 
         $this->getServer()->getCommandMap()->register(DeathRunCommand::class, new DeathRunCommand());
@@ -54,13 +61,6 @@ class DeathRun extends Game {
      * @return TargetOffline
      */
     public function generateNewTargetOffline(array $data): TargetOffline {
-        return new TargetOffline($data);
-    }
-
-    /**
-     * @return bool
-     */
-    public static function isInDevelopmentMode(): bool {
-        return true;
+        return new CustomTargetOffline($data);
     }
 }

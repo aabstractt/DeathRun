@@ -6,11 +6,26 @@ namespace deathrun\arena;
 
 use Exception;
 use gameapi\math\GameLocation;
+use gameapi\math\GamePosition;
 use gameapi\math\GameVector3;
 use pocketmine\level\Level as pocketLevel;
 use pocketmine\math\Vector3;
 
 class Level extends \gameapi\arena\Level {
+
+    /**
+     * @param int $slot
+     * @param pocketLevel $level
+     * @return GamePosition
+     * @throws Exception
+     */
+    public function getSlotPosition(int $slot, pocketLevel $level): GamePosition {
+        if ($slot == 1) {
+            return parent::getSlotPosition($slot, $level);
+        }
+
+        return $this->getTrapperSpawn($slot, $level);
+    }
 
     /**
      * @param int $slot
@@ -33,6 +48,13 @@ class Level extends \gameapi\arena\Level {
         }
 
         return GameVector3::fromArray($data);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCheckpoints(): array {
+        return $this->data['checkpoints'];
     }
 
     /**

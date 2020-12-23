@@ -21,7 +21,7 @@ class Utils {
      * @param int $slot
      */
     public static function addPlayer(string $name, int $slot): void {
-        self::$trapSteps[strtolower($name)] = 1;
+        self::$trapSteps[strtolower($name)] = 2;
 
         self::$playerSlot[strtolower($name)] = $slot;
     }
@@ -59,7 +59,7 @@ class Utils {
      * @return int
      */
     public static function getPlayerSlot(string $name): int {
-        return self::$playerSlot[$name] ?? 0;
+        return self::$playerSlot[strtolower($name)] ?? 0;
     }
 
     /**
@@ -92,7 +92,7 @@ class Utils {
 
         $level->handleUpdate();
 
-        $player->sendMessage(TextFormat::BLUE . 'Trap ' . self::getPlayerSlot($name) . ' set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ());
+        $player->sendMessage(TextFormat::BLUE . 'Trap ' . self::getPlayerSlot($name) . ' (' . self::getTrapStep($name) . ') set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ());
 
         self::updateStep($player->getName());
 
