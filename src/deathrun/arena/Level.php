@@ -171,7 +171,7 @@ class Level extends \gameapi\arena\Level {
             foreach ($data as $k => $v) {
                 list($x, $y, $z) = explode(':', $k);
 
-                $v->getLevelNonNull()->setBlock(new Vector3($x, $y, $z), $v);
+                $v->getLevelNonNull()->setBlock(new Vector3((int) $x, (int) $y, (int) $z), $v);
             }
         }), 8 * 10);
     }
