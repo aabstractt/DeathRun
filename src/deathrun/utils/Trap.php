@@ -10,8 +10,6 @@ class Trap {
     private $slot;
     /** @var int */
     private $step;
-    /** @var int */
-    private $startAt;
     /** @var string */
     private $type;
     /** @var Vector3 */
@@ -21,16 +19,13 @@ class Trap {
      * Trap constructor.
      * @param int $slot
      * @param int $step
-     * @param int $startAt
      * @param string $type
      * @param Vector3 $vector3
      */
-    public function __construct(int $slot, int $step, int $startAt, string $type, Vector3 $vector3) {
+    public function __construct(int $slot, int $step, string $type, Vector3 $vector3) {
         $this->slot = $slot;
 
         $this->step = $step;
-
-        $this->startAt = $startAt;
 
         $this->type = $type;
 
@@ -55,9 +50,7 @@ class Trap {
      * @return Vector3
      */
     public function asVector3(): Vector3 {
-        $vector = $this->vector3;
-
-        return $vector->add(0, $this->startAt);
+        return $this->vector3;
     }
 
     /**
@@ -65,27 +58,6 @@ class Trap {
      */
     public function getType(): string {
         return $this->type;
-    }
-
-    /**
-     * @return bool
-     */
-    public function canBreak(): bool {
-        return $this->type == 'Break';
-    }
-
-    /**
-     * @return bool
-     */
-    public function canReplace(): bool {
-        return $this->type == 'Replace';
-    }
-
-    /**
-     * @return bool
-     */
-    public function canUpdate(): bool {
-        return $this->type == 'Update';
     }
 
     /**

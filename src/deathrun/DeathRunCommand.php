@@ -6,6 +6,7 @@ namespace deathrun;
 
 use deathrun\arena\Arena;
 use deathrun\arena\Level;
+use Exception;
 use gameapi\asyncio\FileCopyAsyncTask;
 use gameapi\Command;
 use pocketmine\Player as pocketPlayer;
@@ -24,7 +25,7 @@ class DeathRunCommand extends Command {
     /**
      * @param pocketPlayer $player
      * @param array $args
-     * @throws \Exception
+     * @throws Exception
      */
     protected function run(pocketPlayer $player, array $args): void {
         if (!$player->hasPermission('deathrun.admin')) {
@@ -55,8 +56,8 @@ class DeathRunCommand extends Command {
                 'minSlots' => 1,
                 'maxSlots' => 8,
                 'spawns' => [],
+                'trapspawn' => [],
                 'checkpoints' => [],
-                'traps' => []
             ];
 
             Server::getInstance()->getAsyncPool()->submitTask(new FileCopyAsyncTask(Server::getInstance()->getDataPath() . '/worlds/' . $data['folderName'], DeathRun::getInstance()->getDataFolder() . '/arenas/' . $data['folderName'], function () use ($player, $data) {
@@ -68,13 +69,14 @@ class DeathRunCommand extends Command {
             return;
         }
 
-        if ($args[0] == 'spawn') {
+        if ($args[0] == 'spawns') {
             if ($player->getLevelNonNull() === Server::getInstance()->getDefaultLevel()) {
                 $player->sendMessage(TextFormat::RED . 'You can\'t setup maps in the lobby.');
 
                 return;
             }
 
+            /** @var Level $level */
             $level = DeathRun::getLevelFactory()->getLevel($player->getLevelNonNull()->getFolderName());
 
             if ($level == null) {
@@ -83,42 +85,11 @@ class DeathRunCommand extends Command {
                 return;
             }
 
-            $level->addSlotPosition(1, ($loc = $player->getLocation()));
+            $level->handleSpawns($player->getLevelNonNull());
 
             $level->handleUpdate();
 
-            $player->sendMessage(TextFormat::BLUE . 'Spawn set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ() . ' §6Yaw:§b ' . $loc->getYaw() . ' §6Pitch:§b ' . $loc->getPitch());
-
-            return;
-        }
-
-        if ($args[0] == 'trapspawn') {
-            if (empty($args[1])) {
-                $player->sendMessage(TextFormat::RED . 'Usage: /' . $this->getName() . ' trapspawn <slot>');
-
-                return;
-            }
-
-            if ($player->getLevelNonNull() === Server::getInstance()->getDefaultLevel()) {
-                $player->sendMessage(TextFormat::RED . 'You can\'t setup maps in the lobby.');
-
-                return;
-            }
-
-            /** @var Level|null $level */
-            $level = DeathRun::getLevelFactory()->getLevel($player->getLevelNonNull()->getFolderName());
-
-            if ($level == null) {
-                $player->sendMessage(TextFormat::RED . 'This arena doesn\'t exist.');
-
-                return;
-            }
-
-            $level->addTrapPosition((int) $args[1], 1, ($loc = $player->getLocation()));
-
-            $level->handleUpdate();
-
-            $player->sendMessage(TextFormat::BLUE . 'Trap Spawn ' . $args[1] . ' set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ() . ' §6Yaw:§b ' . $loc->getYaw() . ' §6Pitch:§b ' . $loc->getPitch());
+            $player->sendMessage(TextFormat::BLUE . 'Spawns (' . TextFormat::GOLD . count($level->getData()['spawns']) . TextFormat::BLUE . ') and Traps (' . TextFormat::GOLD . count($level->getData()['trapspawn']) . TextFormat::BLUE . ') loaded!');
 
             return;
         }
@@ -150,36 +121,6 @@ class DeathRunCommand extends Command {
             $level->handleUpdate();
 
             $player->sendMessage(TextFormat::BLUE . 'Checkpoint ' . $args[1] . ' set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ() . ' §6Yaw:§b ' . $loc->getYaw() . ' §6Pitch:§b ' . $loc->getPitch());
-
-            return;
-        }
-
-        if ($args[0] == 'trap') {
-            if (!isset($args[1])) {
-                $player->sendMessage(TextFormat::RED . '/' . $this->getName() . ' trap <slot>');
-
-                return;
-            }
-
-            $worldLevel = $player->getLevelNonNull();
-
-            if ($worldLevel === Server::getInstance()->getDefaultLevel()) {
-                $player->sendMessage(TextFormat::RED . 'You can\'t setup maps in the lobby.');
-
-                return;
-            }
-
-            if (DeathRun::getLevelFactory()->getLevel($worldLevel->getFolderName()) == null) {
-                $player->sendMessage(TextFormat::RED . 'This arena doesn\'t exist.');
-
-                return;
-            }
-
-            if (Utils::inTrapStep($player->getName())) return;
-
-            Utils::addPlayer($player->getName(), (int) $args[1]);
-
-            $player->sendMessage(TextFormat::GREEN . 'Touch the trapper spawn');
 
             return;
         }

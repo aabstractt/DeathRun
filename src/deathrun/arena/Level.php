@@ -12,6 +12,7 @@ use gameapi\math\GamePosition;
 use gameapi\math\GameVector3;
 use pocketmine\block\Block;
 use pocketmine\level\Level as pocketLevel;
+use pocketmine\level\Location;
 use pocketmine\math\Vector3;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\tile\Sign;
@@ -29,7 +30,7 @@ class Level extends \gameapi\arena\Level {
             return parent::getSlotPosition($slot, $level);
         }
 
-        return $this->getTrapperSpawn(1, $level);
+        return $this->getTrapPosition(1, $level);
     }
 
     /**
@@ -64,48 +65,45 @@ class Level extends \gameapi\arena\Level {
 
     /**
      * @param int $slot
-     * @param int $type
      * @param Vector3 $loc
      */
-    public function addTrapPosition(int $slot, int $type, Vector3 $loc): void {
-        $data = GameVector3::toArray($loc);
-
-        if (empty($data['yaw'])) $data = array_merge($data, ['yaw' => 0, 'pitch' => 0]);
-
-        $this->data['traps'][$slot][$type] = $data;
+    public function addTrapPosition(int $slot, Vector3 $loc): void {
+        $this->data['trapspawn'][$slot] = GameVector3::toArray($loc);
     }
 
     /**
      * @param int $slot
-     * @param int $type
      * @param pocketLevel $level
      * @return GameLocation
      * @throws Exception
      */
-    public function getTrapPosition(int $slot, int $type, pocketLevel $level): GameLocation {
+    public function getTrapPosition(int $slot, pocketLevel $level): GameLocation {
         $data = $this->data['traps'][$slot] ?? null;
 
         if ($data == null) {
             throw new Exception('Trap slot ' . $slot . ' not found');
         }
 
-        $data = $data[$type] ?? null;
-
-        if ($data == null) {
-            throw new Exception('Trap type ' . $type . ' not found');
-        }
-
         return GameLocation::fromArray($data, $level);
     }
 
     /**
-     * @param int $slot
-     * @param pocketLevel $level
-     * @return GameLocation
-     * @throws Exception
+     * @param pocketLevel $world
      */
-    public function getTrapperSpawn(int $slot, pocketLevel $level): GameLocation {
-        return $this->getTrapPosition($slot, 1, $level);
+    public function handleSpawns(pocketLevel $world): void {
+        foreach ($world->getTiles() as $tile) {
+            if (!$tile instanceof Sign) continue;
+
+            $text = $tile->getLine(0);
+
+            if ($text != 'TRAP' && $text != 'SPAWN') continue;
+
+            if ($text == 'TRAP') {
+                $this->addTrapPosition((int) $tile->getLine(1), $tile->asVector3());
+            } else {
+                $this->addSlotPosition(1, Location::fromObject($tile->asVector3(), $world));
+            }
+        }
     }
 
     /**
@@ -123,7 +121,7 @@ class Level extends \gameapi\arena\Level {
 
             if (empty($text)) continue;
 
-            $traps[] = new Trap((int) $text[0], (int) $text[1], (int) $tile->getLine(1), $tile->getLine(2), $tile->asVector3());
+            $traps[] = new Trap((int) $text[0], (int) $text[1], $tile->getLine(1), $tile->asVector3());
         }
 
         return $traps;

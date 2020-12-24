@@ -145,13 +145,13 @@ class Arena extends \gameapi\arena\Arena {
 
         if ($world == null) return;
 
-        if ($type == 'Break') {
+        if ($type == 'BREAK') {
             $level->removeBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3());
 
             return;
         }
 
-        if ($type == 'Place') {
+        if ($type == 'PLACE') {
             $level->removeBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3(), 241, 14, true);
 
             return;
