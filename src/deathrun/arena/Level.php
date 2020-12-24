@@ -84,7 +84,7 @@ class Level extends \gameapi\arena\Level {
             throw new Exception('Trap slot ' . $slot . ' not found');
         }
 
-        return GameLocation::fromArray($data, $level);
+        return GameVector3::fromArray($data, $level);
     }
 
     /**
