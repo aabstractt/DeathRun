@@ -6,12 +6,17 @@ namespace deathrun\arena;
 
 use deathrun\arena\task\GameMatchUpdateTask;
 use deathrun\player\Player;
+use deathrun\utils\Trap;
+use Exception;
 use gameapi\arena\Level;
 use gameapi\arena\task\GameCountDownUpdateTask;
 use pocketmine\item\Item;
 use pocketmine\utils\TextFormat;
 
 class Arena extends \gameapi\arena\Arena {
+
+    /** @var array<int, Trap> */
+    private $traps = [];
 
     public function bootGame(): void {
         $this->scheduleRepeatingTask(new GameCountDownUpdateTask('game_count_down_update', $this, 5, 10, 15));
@@ -72,6 +77,10 @@ class Arena extends \gameapi\arena\Arena {
             }
         }
 
+        $world = $this->getWorld();
+
+        if ($world != null) $this->traps = $this->getLevel()->loadTraps($world);
+
         parent::start($started);
     }
 
@@ -92,5 +101,60 @@ class Arena extends \gameapi\arena\Arena {
         }
 
         return null;
+    }
+
+    /**
+     * @param int $trapSlot
+     * @throws Exception
+     */
+    public function handleActivateTrap(int $trapSlot): void {
+        /** @var array<int, Trap> $traps */
+        $traps = [];
+
+        $intents = 0;
+
+        while(count($traps) < 2 && $intents < 3) {
+            foreach ($this->traps as $trap) {
+                if ($trap->getSlot() != $trapSlot) continue;
+
+                if (isset($traps[$trap->getStep()])) continue;
+
+                $traps[$trap->getStep()] = $trap;
+            }
+
+            $intents++;
+        }
+
+        if (count($traps) < 2) {
+            throw new Exception('Trap ' . $trapSlot . ' is not valid');
+        }
+
+        $type = null;
+
+        foreach ($traps as $trap) {
+            $type = $trap->selectType($traps);
+        }
+
+        if ($type == null) {
+            throw new Exception('Trap ' . $trapSlot . ' is not valid');
+        }
+
+        $level = $this->getLevel();
+
+        $world = $this->getWorld();
+
+        if ($world == null) return;
+
+        if ($type == 'Break') {
+            $level->removeBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3());
+
+            return;
+        }
+
+        if ($type == 'Place') {
+            $level->removeBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3(), 241, 14, true);
+
+            return;
+        }
     }
 }

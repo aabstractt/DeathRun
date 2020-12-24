@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace deathrun\arena;
 
 use deathrun\DeathRun;
+use deathrun\utils\Trap;
 use Exception;
 use gameapi\math\GameLocation;
 use gameapi\math\GamePosition;
@@ -13,6 +14,7 @@ use pocketmine\block\Block;
 use pocketmine\level\Level as pocketLevel;
 use pocketmine\math\Vector3;
 use pocketmine\scheduler\ClosureTask;
+use pocketmine\tile\Sign;
 
 class Level extends \gameapi\arena\Level {
 
@@ -108,13 +110,34 @@ class Level extends \gameapi\arena\Level {
 
     /**
      * @param pocketLevel $world
-     * @param int $trapSlot
-     * @throws Exception
+     * @return array<int, Trap>
      */
-    public function removeBlocks(pocketLevel $world, int $trapSlot): void {
-        $pos1 = $this->getTrapPosition($trapSlot, 2, $world);
-        $pos2 = $this->getTrapPosition($trapSlot, 3, $world);
+    public function loadTraps(pocketLevel $world): array {
+        /** @var array<int, Trap> $traps */
+        $traps = [];
 
+        foreach ($world->getTiles() as $tile) {
+            if (!$tile instanceof Sign) continue;
+
+            $text = explode(':', $tile->getLine(0));
+
+            if (empty($text)) continue;
+
+            $traps[] = new Trap($text[0], (int) $traps[1], (int) $tile->getLine(1), $tile->getLine(2), $tile->asVector3());
+        }
+
+        return $traps;
+    }
+
+    /**
+     * @param pocketLevel $world
+     * @param Vector3 $pos1
+     * @param Vector3 $pos2
+     * @param int $id
+     * @param int $damage
+     * @param bool $replaceAll
+     */
+    public function removeBlocks(pocketLevel $world, Vector3 $pos1, Vector3 $pos2, int $id = 0, int $damage = 0, bool $replaceAll = false): void {
         /** @var array<string, Block> $data */
         $data = [];
 
@@ -123,13 +146,15 @@ class Level extends \gameapi\arena\Level {
                 for ($z = min($pos1->getZ(), $pos2->getZ()); $z < max($pos1->getZ(), $pos2->getZ()); ++$z) {
                     $block = $world->getBlockAt($x, $y, $z);
 
-                    //if ($block->getId() !== Block::HARDENED_CLAY) continue;
-                    if ($block->getDamage() != 14) continue;
+                    if (!$replaceAll) {
+                        if ($block->getId() != Block::STAINED_HARDENED_CLAY || $block->getId() != Block::STAINED_GLASS) continue;
 
+                        if ($block->getDamage() == 5) continue;
+                    }
 
                     $data[$x . ':' . $y . ':' . $z] = clone $block;
 
-                    $world->setBlockIdAt($x, $y, $z, 0);
+                    $world->setBlock(new Vector3($x, $y, $z), Block::get($id, $damage));
                 }
             }
         }

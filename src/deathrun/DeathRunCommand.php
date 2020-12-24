@@ -8,7 +8,6 @@ use deathrun\arena\Arena;
 use deathrun\arena\Level;
 use gameapi\asyncio\FileCopyAsyncTask;
 use gameapi\Command;
-use gameapi\Game;
 use pocketmine\Player as pocketPlayer;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -25,6 +24,7 @@ class DeathRunCommand extends Command {
     /**
      * @param pocketPlayer $player
      * @param array $args
+     * @throws \Exception
      */
     protected function run(pocketPlayer $player, array $args): void {
         if (!$player->hasPermission('deathrun.admin')) {
@@ -180,6 +180,19 @@ class DeathRunCommand extends Command {
             Utils::addPlayer($player->getName(), (int) $args[1]);
 
             $player->sendMessage(TextFormat::GREEN . 'Touch the trapper spawn');
+
+            return;
+        }
+
+        if ($args[0] == 't') {
+            /** @var Arena $arena */
+            $arena = DeathRun::getArenaFactory()->getArena($player);
+
+            if ($arena == null) return;
+
+            $player->sendMessage(TextFormat::RED . 'Removing blocks...');
+
+            $arena->handleActivateTrap((int) $args[1]);
 
             return;
         }
