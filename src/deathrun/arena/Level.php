@@ -78,7 +78,7 @@ class Level extends \gameapi\arena\Level {
      * @throws Exception
      */
     public function getTrapPosition(int $slot, pocketLevel $level): GameLocation {
-        $data = $this->data['traps'][$slot] ?? null;
+        $data = $this->data['trapspawn'][$slot] ?? null;
 
         if ($data == null) {
             throw new Exception('Trap slot ' . $slot . ' not found');
