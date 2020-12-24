@@ -110,10 +110,10 @@ class Level extends \gameapi\arena\Level {
 
     /**
      * @param pocketLevel $world
-     * @return array<int, Trap>
+     * @return Trap[]
      */
     public function loadTraps(pocketLevel $world): array {
-        /** @var array<int, Trap> $traps */
+        /** @var Trap[] $traps */
         $traps = [];
 
         foreach ($world->getTiles() as $tile) {

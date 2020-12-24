@@ -85,7 +85,7 @@ class Arena extends \gameapi\arena\Arena {
     }
 
     public function startGame(): void {
-        $this->getTrapper()->setImmobile(false);
+        foreach ($this->getAllPlayers() as $player) $player->setImmobile(false);
 
         $this->scheduleRepeatingTask(new GameMatchUpdateTask('game_match_update', $this));
     }
