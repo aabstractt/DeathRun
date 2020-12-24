@@ -123,7 +123,7 @@ class Level extends \gameapi\arena\Level {
 
             if (empty($text)) continue;
 
-            $traps[] = new Trap($text[0], (int) $traps[1], (int) $tile->getLine(1), $tile->getLine(2), $tile->asVector3());
+            $traps[] = new Trap((int) $text[0], (int) $traps[1], (int) $tile->getLine(1), $tile->getLine(2), $tile->asVector3());
         }
 
         return $traps;
@@ -144,7 +144,7 @@ class Level extends \gameapi\arena\Level {
         for ($x = min($pos1->getX(), $pos2->getX()); $x < max($pos1->getX(), $pos2->getX()); ++$x) {
             for ($y = min($pos1->getY(), $pos2->getY()); $y < max($pos1->getY(), $pos2->getY()); ++$y) {
                 for ($z = min($pos1->getZ(), $pos2->getZ()); $z < max($pos1->getZ(), $pos2->getZ()); ++$z) {
-                    $block = $world->getBlockAt($x, $y, $z);
+                    $block = $world->getBlockAt((int) $x, (int) $y, (int) $z);
 
                     if (!$replaceAll) {
                         if ($block->getId() != Block::STAINED_HARDENED_CLAY || $block->getId() != Block::STAINED_GLASS) continue;

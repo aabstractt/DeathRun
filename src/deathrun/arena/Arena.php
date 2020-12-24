@@ -34,10 +34,10 @@ class Arena extends \gameapi\arena\Arena {
 
 
     /**
-     * @return Player[]
+     * @return array<string, Player>
      */
     public function getPlayers(): array {
-        /** @var Player[] $players */
+        /** @var array<string, Player> $players */
         $players = parent::getPlayers();
 
         return $players;
@@ -56,9 +56,9 @@ class Arena extends \gameapi\arena\Arena {
     public function start(bool $started = true): void {
         if (!$started) {
             /** @var Player|null $player */
-            $player = $this->getPlayer(array_rand($this->getPlayers()));
+            $player = $this->getPlayer((string) array_rand($this->getPlayers()));
 
-            if ($player != null) {
+            if ($player !== null) {
                 $player->setRunning();
 
                 $player->setImmobile();
