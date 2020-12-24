@@ -31,6 +31,13 @@ jobs:
           submodules: true
           path: vendor/gameapi
           ref: master
+      - name: Checkout RedstoneCircuit_PMMP-Plugin
+        uses: actions/checkout@v2
+        with:
+          repository: tedo0627/RedstoneCircuit_PMMP-Plugin
+          submodules: true
+          path: vendor/RedstoneCircuit
+          ref: master
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Run PHPStan
         uses: nxtlvlsoftware/pmmp-phpstan-action@3

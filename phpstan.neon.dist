@@ -9,5 +9,5 @@ parameters:
     bootstrapFiles:
         - phar:///pocketmine/PocketMine-MP.phar/vendor/autoload.php
     scanDirectories:
-        - /source
         - /source/vendor/gameapi
+        - /source/vendor/RedstoneCircuit
