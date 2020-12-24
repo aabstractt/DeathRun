@@ -77,15 +77,15 @@ class Arena extends \gameapi\arena\Arena {
             }
         }
 
-        $world = $this->getWorld();
-
-        if ($world != null) $this->traps = $this->getLevel()->loadTraps($world);
-
         parent::start($started);
     }
 
     public function startGame(): void {
         foreach ($this->getAllPlayers() as $player) $player->setImmobile(false);
+
+        $world = $this->getWorld();
+
+        if ($world != null) $this->traps = $this->getLevel()->loadTraps($world);
 
         $this->scheduleRepeatingTask(new GameMatchUpdateTask('game_match_update', $this));
     }

@@ -125,13 +125,13 @@ class Level extends \gameapi\arena\Level {
 
             $text = explode(':', $lines[0]);
 
-            if (empty($text)) continue;
-
             if (empty($text[1])) continue;
 
             if (empty($lines[1])) continue;
 
             $traps[] = new Trap((int) $text[0], (int) $text[1], $lines[1], $tile->asVector3());
+
+            $world->setBlock($tile->asVector3(), Block::get(0));
         }
 
         return $traps;
@@ -155,7 +155,7 @@ class Level extends \gameapi\arena\Level {
                     $block = $world->getBlockAt((int) $x, (int) $y, (int) $z);
 
                     if (!$replaceAll) {
-                        if ($block->getId() != Block::STAINED_HARDENED_CLAY || $block->getId() != Block::STAINED_GLASS) continue;
+                        if ($block->getId() != Block::STAINED_HARDENED_CLAY && $block->getId() != Block::STAINED_GLASS) continue;
 
                         if ($block->getDamage() == 5) continue;
                     }
@@ -171,7 +171,7 @@ class Level extends \gameapi\arena\Level {
             foreach ($data as $k => $v) {
                 list($x, $y, $z) = explode(':', $k);
 
-                $v->getLevelNonNull()->setBlockIdAt((int) $x, (int) $y, (int) $z, $v->getId());
+                $v->getLevelNonNull()->setBlock(new Vector3($x, $y, $z), $v);
             }
         }), 8 * 10);
     }
