@@ -7,7 +7,6 @@ namespace deathrun\arena;
 use deathrun\DeathRun;
 use deathrun\utils\Trap;
 use Exception;
-use gameapi\math\GameLocation;
 use gameapi\math\GamePosition;
 use gameapi\math\GameVector3;
 use pocketmine\block\Block;
@@ -74,7 +73,7 @@ class Level extends \gameapi\arena\Level {
     /**
      * @param int $slot
      * @param pocketLevel $level
-     * @return GameLocation
+     * @return GamePosition
      * @throws Exception
      */
     public function getTrapPosition(int $slot, pocketLevel $level): GamePosition {
@@ -120,11 +119,19 @@ class Level extends \gameapi\arena\Level {
         foreach ($world->getTiles() as $tile) {
             if (!$tile instanceof Sign) continue;
 
-            $text = explode(':', $tile->getLine(0));
+            $lines = $tile->getText();
+
+            if (empty($lines[0])) continue;
+
+            $text = explode(':', $lines[0]);
 
             if (empty($text)) continue;
 
-            $traps[] = new Trap((int) $text[0], (int) $text[1], $tile->getLine(1), $tile->asVector3());
+            if (empty($text[1])) continue;
+
+            if (empty($lines[1])) continue;
+
+            $traps[] = new Trap((int) $text[0], (int) $text[1], $lines[1], $tile->asVector3());
         }
 
         return $traps;
