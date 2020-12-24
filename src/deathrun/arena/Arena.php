@@ -10,6 +10,7 @@ use deathrun\utils\Trap;
 use Exception;
 use gameapi\arena\Level;
 use gameapi\arena\task\GameCountDownUpdateTask;
+use pocketmine\block\Block;
 use pocketmine\item\Item;
 use pocketmine\utils\TextFormat;
 
@@ -146,13 +147,13 @@ class Arena extends \gameapi\arena\Arena {
         if ($world == null) return;
 
         if ($type == 'BREAK') {
-            $level->removeBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3());
+            $level->handleUpdateBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3());
 
             return;
         }
 
         if ($type == 'PLACE') {
-            $level->removeBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3(), 241, 14, true);
+            $level->handleUpdateBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3(), Block::STAINED_GLASS, 14, true);
 
             return;
         }
