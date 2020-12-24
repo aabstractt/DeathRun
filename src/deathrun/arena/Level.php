@@ -204,7 +204,7 @@ class Level extends \gameapi\arena\Level {
                         return;
                     }
 
-                    $tile = $world->getTileAt($x, $y, $z);
+                    $tile = $world->getTileAt((int)$x, (int)$y, (int)$z);
 
                     if (!$tile instanceof BlockEntityDispenser) continue;
 
