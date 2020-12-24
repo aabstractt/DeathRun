@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace deathrun\arena;
 
 use deathrun\DeathRun;
+use deathrun\player\Player;
 use deathrun\utils\Trap;
 use Exception;
 use gameapi\math\GamePosition;
 use gameapi\math\GameVector3;
 use pocketmine\block\Block;
+use pocketmine\level\Explosion;
 use pocketmine\level\Level as pocketLevel;
 use pocketmine\level\Location;
+use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\tile\Sign;
+use redstone\blockEntities\BlockEntityDispenser;
 
 class Level extends \gameapi\arena\Level {
 
@@ -101,7 +105,7 @@ class Level extends \gameapi\arena\Level {
             if ($text != 'TRAP' && $text != 'SPAWN') continue;
 
             if ($text == 'TRAP') {
-                $this->addTrapPosition((int) $tile->getLine(1), $tile->asVector3());
+                $this->addTrapPosition((int)$tile->getLine(1), $tile->asVector3());
             } else {
                 $this->addSlotPosition(1, Location::fromObject($tile->asVector3(), $world));
             }
@@ -129,7 +133,7 @@ class Level extends \gameapi\arena\Level {
 
             if (empty($lines[1])) continue;
 
-            $traps[] = new Trap((int) $text[0], (int) $text[1], $lines[1], $tile->asVector3());
+            $traps[] = new Trap((int)$text[0], (int)$text[1], $lines[1], $tile->asVector3());
 
             $world->setBlock($tile->asVector3(), Block::get(0));
         }
@@ -152,7 +156,7 @@ class Level extends \gameapi\arena\Level {
         for ($x = min($pos1->getX(), $pos2->getX()); $x <= max($pos1->getX(), $pos2->getX()); ++$x) {
             for ($y = min($pos1->getY(), $pos2->getY()); $y <= max($pos1->getY(), $pos2->getY()); ++$y) {
                 for ($z = min($pos1->getZ(), $pos2->getZ()); $z <= max($pos1->getZ(), $pos2->getZ()); ++$z) {
-                    $block = $world->getBlockAt((int) $x, (int) $y, (int) $z);
+                    $block = $world->getBlockAt((int)$x, (int)$y, (int)$z);
 
                     if (!$replaceAll) {
                         if ($block->getId() != Block::STAINED_HARDENED_CLAY && $block->getId() != Block::STAINED_GLASS) continue;
@@ -167,12 +171,46 @@ class Level extends \gameapi\arena\Level {
             }
         }
 
-        DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use($data) : void {
+        DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use ($data): void {
             foreach ($data as $k => $v) {
                 list($x, $y, $z) = explode(':', $k);
 
-                $v->getLevelNonNull()->setBlock(new Vector3((int) $x, (int) $y, (int) $z), $v);
+                $v->getLevelNonNull()->setBlock(new Vector3((int)$x, (int)$y, (int)$z), $v);
             }
         }), 8 * 10);
+    }
+
+    /**
+     * @param pocketLevel $world
+     * @param array<string, Player> $players
+     * @param Vector3 $pos1
+     * @param Vector3 $pos2
+     */
+    public function handleUpdateTile(pocketLevel $world, array $players, Vector3 $pos1, Vector3 $pos2): void {
+        for ($x = min($pos1->getX(), $pos2->getX()); $x <= max($pos1->getX(), $pos2->getX()); ++$x) {
+            for ($y = min($pos1->getY(), $pos2->getY()); $y <= max($pos1->getY(), $pos2->getY()); ++$y) {
+                for ($z = min($pos1->getZ(), $pos2->getZ()); $z <= max($pos1->getZ(), $pos2->getZ()); ++$z) {
+                    $block = $world->getBlockAt((int)$x, (int)$y, (int)$z);
+
+                    if ($block->getId() != Block::TNT && $block->getId() != Block::DISPENSER) continue;
+
+                    if ($block->getId() == Block::TNT) {
+                        (new Explosion(Position::fromObject($block->add(0, 0.98 / 2), $block->getLevelNonNull()), 4, $block))->explodeB();
+
+                        foreach ($players as $player) {
+                            $player->remove(false);
+                        }
+
+                        return;
+                    }
+
+                    $tile = $world->getTileAt($x, $y, $z);
+
+                    if (!$tile instanceof BlockEntityDispenser) continue;
+
+                    $tile->dropItem();
+                }
+            }
+        }
     }
 }

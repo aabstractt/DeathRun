@@ -12,6 +12,7 @@ use gameapi\arena\Level;
 use gameapi\arena\task\GameCountDownUpdateTask;
 use pocketmine\block\Block;
 use pocketmine\item\Item;
+use pocketmine\math\Vector3;
 use pocketmine\utils\TextFormat;
 
 class Arena extends \gameapi\arena\Arena {
@@ -146,16 +147,51 @@ class Arena extends \gameapi\arena\Arena {
 
         if ($world == null) return;
 
+        $pos1 = $traps[1]->asVector3();
+        $pos2 = $traps[2]->asVector3();
+
         if ($type == 'BREAK') {
-            $level->handleUpdateBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3());
+            $level->handleUpdateBlocks($world, $pos1, $pos2);
 
             return;
         }
 
         if ($type == 'PLACE') {
-            $level->handleUpdateBlocks($world, $traps[1]->asVector3(), $traps[2]->asVector3(), Block::STAINED_GLASS, 14, true);
+            $level->handleUpdateBlocks($world, $pos1, $pos2, Block::STAINED_GLASS, 14, true);
 
             return;
         }
+
+        if ($type == 'UPDATE') {
+            $level->handleUpdateTile($world, $this->getPlayersRadius($pos1, $pos2), $pos1, $pos2);
+        }
+    }
+
+    /**
+     * @param Vector3 $pos1
+     * @param Vector3 $pos2
+     * @return Player[]
+     */
+    private function getPlayersRadius(Vector3 $pos1, Vector3 $pos2): array {
+        /** @var array<string, Player> $players */
+        $players = [];
+
+        for ($x = min($pos1->getX(), $pos2->getX()); $x <= max($pos1->getX(), $pos2->getX()); ++$x) {
+            for ($y = min($pos1->getY(), $pos2->getY()); $y <= max($pos1->getY(), $pos2->getY()); ++$y) {
+                for ($z = min($pos1->getZ(), $pos2->getZ()); $z <= max($pos1->getZ(), $pos2->getZ()); ++$z) {
+                    foreach ($this->getPlayers() as $player) {
+                        if (!$player->isRunner()) continue;
+
+                        $pos = $player->getGeneralPlayer()->asVector3();
+
+                        if ((int) floor($x) == $pos->getFloorX() && (int) floor($y) == $pos->getFloorY() && (int) floor($z) == $pos->getFloorZ()) {
+                            $players[$player->getName()] = $player;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $players;
     }
 }
