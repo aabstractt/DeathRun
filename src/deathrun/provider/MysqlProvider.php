@@ -88,4 +88,11 @@ class MysqlProvider extends \gameapi\provider\MysqlProvider {
 
         return null;
     }
+
+    /**
+     * @return array
+     */
+    public function getLeaderboard(): array {
+        return [];
+    }
 }

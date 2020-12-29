@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace deathrun\arena;
 
 use deathrun\arena\task\GameMatchUpdateTask;
+use deathrun\listener\ArenaListener;
 use deathrun\player\Player;
 use deathrun\utils\Trap;
 use Exception;
 use gameapi\arena\Level;
 use gameapi\arena\task\GameCountDownUpdateTask;
 use pocketmine\block\Block;
-use pocketmine\item\Item;
 use pocketmine\math\Vector3;
-use pocketmine\utils\TextFormat;
 
-class Arena extends \gameapi\arena\Arena {
+class Arena extends ArenaListener {
 
     /** @var array<int, Trap> */
     private $traps = [];
@@ -65,18 +64,6 @@ class Arena extends \gameapi\arena\Arena {
 
                 $player->setImmobile();
             }
-
-            foreach ($this->getPlayers() as $player) {
-                if (!$player->isRunner()) continue;
-
-                $instance = $player->getGeneralPlayer();
-
-                if ($instance == null) continue;
-
-                $instance->getInventory()->clearAll();
-
-                $instance->getInventory()->setItem(0, (Item::get(Item::FEATHER))->setCustomName(TextFormat::RESET . TextFormat::YELLOW . 'Leap'));
-            }
         }
 
         parent::start($started);
@@ -90,19 +77,6 @@ class Arena extends \gameapi\arena\Arena {
         if ($world != null) $this->traps = $this->getLevel()->loadTraps($world);
 
         $this->scheduleRepeatingTask(new GameMatchUpdateTask('game_match_update', $this));
-    }
-
-    /**
-     * @return Player|null
-     */
-    public function getTrapper(): ?Player {
-        foreach ($this->getPlayers() as $player) {
-            if ($player->isRunner()) continue;
-
-            return $player;
-        }
-
-        return null;
     }
 
     /**

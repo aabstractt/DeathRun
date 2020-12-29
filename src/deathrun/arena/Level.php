@@ -46,14 +46,15 @@ class Level extends \gameapi\arena\Level {
 
     /**
      * @param int $slot
-     * @return GameVector3
+     * @param int $step
+     * @return GameVector3|null
      * @throws Exception
      */
-    public function getCheckpointPosition(int $slot): GameVector3 {
-        $data = $this->data['checkpoints'][$slot] ?? null;
+    public function getCheckpointPosition(int $slot, int $step = 3): ?GameVector3 {
+        $data = $this->data['checkpoints'][$slot][$step] ?? null;
 
         if ($data == null) {
-            throw new Exception('Checkpoint not found');
+            return null;
         }
 
         return GameVector3::fromArray($data);
@@ -91,6 +92,14 @@ class Level extends \gameapi\arena\Level {
         $pos = GamePosition::fromArray($data, $level);
 
         return $pos;
+    }
+
+    /**
+     * @param int $slot
+     * @return bool
+     */
+    public function isTrap(int $slot): bool {
+        return isset($this->data['trapspawn'][$slot]);
     }
 
     /**
