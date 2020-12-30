@@ -28,15 +28,13 @@ class GameMatchUpdateTask extends GameUpdateTask {
             return;
         }
 
-        $players = $arena->getPlayers();
-
-        /*if (count($arena->getAllPlayers()) <= 1) {
+        if (count($arena->getAllPlayers()) <= 1) {
             $this->cancel();
 
-            $arena->finish($players);
+            $arena->finish($arena->getSpectators());
 
             return;
-        }*/
+        }
 
         $this->handleUpdateScoreboard();
 
@@ -52,7 +50,9 @@ class GameMatchUpdateTask extends GameUpdateTask {
         foreach ($arena->getPlayers() as $player) {
             if (!$player->isConnected()) continue;
 
-            $player->sendPopup('&bRunner &7&l> &r&60 Deaths &7> &a0/&2' . count($arena->getLevel()->getCheckpoints()) . ' &aCheckpoints');
+            if (!$player->isRunner()) continue;
+
+            $player->sendTip('&bRunner &7&l> &r&60 Deaths &7> &a' . ($player->getStep() - 1) . '/&2' . count($arena->getLevel()->getCheckpoints()) . ' &aCheckpoints');
         }
     }
 

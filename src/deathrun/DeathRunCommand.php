@@ -53,7 +53,7 @@ class DeathRunCommand extends Command {
 
             $data = [
                 'folderName' => $level->getFolderName(),
-                'minSlots' => 1,
+                'minSlots' => 4,
                 'maxSlots' => 8,
                 'spawns' => [],
                 'trapspawn' => [],
@@ -90,37 +90,6 @@ class DeathRunCommand extends Command {
             $level->handleUpdate();
 
             $player->sendMessage(TextFormat::BLUE . 'Spawns (' . TextFormat::GOLD . count($level->getData()['spawns']) . TextFormat::BLUE . ') and Traps (' . TextFormat::GOLD . count($level->getData()['trapspawn']) . TextFormat::BLUE . ') loaded!');
-
-            return;
-        }
-
-        if ($args[0] == 'checkpoint') {
-            if (!isset($args[1])) {
-                $player->sendMessage(TextFormat::RED . '/' . $this->getName() . ' checkpoint <slot>');
-
-                return;
-            }
-
-            if ($player->getLevelNonNull() === Server::getInstance()->getDefaultLevel()) {
-                $player->sendMessage(TextFormat::RED . 'You can\'t setup maps in the lobby.');
-
-                return;
-            }
-
-            /** @var Level $level */
-            $level = DeathRun::getLevelFactory()->getLevel($player->getLevelNonNull()->getFolderName());
-
-            if ($level == null) {
-                $player->sendMessage(TextFormat::RED . 'This arena doesn\'t exist.');
-
-                return;
-            }
-
-            $level->addCheckpointPosition((int) $args[1], ($loc = $player->getLocation()));
-
-            $level->handleUpdate();
-
-            $player->sendMessage(TextFormat::BLUE . 'Checkpoint ' . $args[1] . ' set to §6X:§b ' . $loc->getX() . ' §6Y:§b ' . $loc->getY() . ' §6Z:§b ' . $loc->getZ() . ' §6Yaw:§b ' . $loc->getYaw() . ' §6Pitch:§b ' . $loc->getPitch());
 
             return;
         }

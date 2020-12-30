@@ -22,6 +22,8 @@ class DeathRun extends Game {
      * @throws \Exception
      */
     public function registerClasses(): void {
+        self::$isInDevelopmentMode = true;
+
         $this->provider = new MysqlProvider($this->getConfig()->get('mysql'));
 
         $this->registerListener(new PlayerListener());

@@ -44,22 +44,26 @@ class Player extends mainPlayer {
     /**
      * @param string $message
      */
-    public function sendPopup(string $message): void {
+    public function sendTip(string $message): void {
         $instance = $this->getGeneralPlayer();
 
         if ($instance == null) return;
 
-        $instance->sendPopup(TextFormat::colorize($message));
+        $instance->sendTip(TextFormat::colorize($message));
     }
 
     public function increase(): void {
         if ($this->isRunner()) {
             $this->currentCheckpoint++;
 
+            if ($this->getArena()->getLevel()->isCheckpoint($this->currentCheckpoint)) return;
+
+            $this->finishPlayer();
+
             return;
         }
 
-        if (!$this->getArena()->getLevel()->isTrap($this->getStep())) return;
+        if (!$this->getArena()->getLevel()->isTrap($this->getStep() + 1)) return;
 
         $this->currentTrap++;
     }
@@ -76,7 +80,7 @@ class Player extends mainPlayer {
      * @return int
      */
     public function getStep(): int {
-        return $this->isRunner() ? $this->currentCheckpoint : $this->currentTrap;
+        return $this->isRunner() ? $this->currentCheckpoint + 1 : $this->currentTrap;
     }
 
     /**
@@ -103,6 +107,8 @@ class Player extends mainPlayer {
             if ($this->isRunner()) {
                 $pos = $this->currentCheckpoint > 0 ? $level->getCheckpointPosition($this->currentCheckpoint) : $level->getSlotPosition(1, $this->getArena()->getWorldNonNull());
             } else {
+                if (!$level->isTrap($this->currentTrap)) return;
+
                 $pos = $level->getTrapPosition($this->currentTrap, $this->getArena()->getWorldNonNull());
             }
 
@@ -175,7 +181,7 @@ class Player extends mainPlayer {
             $item->setCustomName(TextFormat::colorize('&r&aActivate Trap'));
             $item->setCustomBlockData(new CompoundTag('', [new StringTag('Name', 'Activate')]));
 
-            for ($i = 2; $i < 7; $i++) $instance->getInventory()->setItem($i, $item);
+            for ($i = 2; $i < 9; $i++) $instance->getInventory()->setItem($i, $item);
         }
     }
 }

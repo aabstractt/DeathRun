@@ -7,7 +7,6 @@ namespace deathrun\arena;
 use deathrun\DeathRun;
 use deathrun\player\Player;
 use deathrun\utils\Trap;
-use Exception;
 use gameapi\math\GamePosition;
 use gameapi\math\GameVector3;
 use pocketmine\block\Block;
@@ -16,6 +15,7 @@ use pocketmine\level\Level as pocketLevel;
 use pocketmine\level\Location;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
+use pocketmine\plugin\PluginException;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\tile\Sign;
 use redstone\blockEntities\BlockEntityDispenser;
@@ -26,7 +26,7 @@ class Level extends \gameapi\arena\Level {
      * @param int $slot
      * @param pocketLevel $level
      * @return GamePosition
-     * @throws Exception
+     * @throws PluginException
      */
     public function getSlotPosition(int $slot, pocketLevel $level): GamePosition {
         if ($slot == 1) {
@@ -38,17 +38,18 @@ class Level extends \gameapi\arena\Level {
 
     /**
      * @param int $slot
+     * @param int $step
      * @param Vector3 $vector3
      */
-    public function addCheckpointPosition(int $slot, Vector3 $vector3): void {
-        $this->data['checkpoints'][$slot] = GameVector3::toArray($vector3);
+    public function addCheckpointPosition(int $slot, int $step, Vector3 $vector3): void {
+        $this->data['checkpoints'][$slot][$step] = GameVector3::toArray($vector3);
     }
 
     /**
      * @param int $slot
      * @param int $step
      * @return GameVector3|null
-     * @throws Exception
+     * @throws PluginException
      */
     public function getCheckpointPosition(int $slot, int $step = 3): ?GameVector3 {
         $data = $this->data['checkpoints'][$slot][$step] ?? null;
@@ -79,13 +80,13 @@ class Level extends \gameapi\arena\Level {
      * @param int $slot
      * @param pocketLevel $level
      * @return GamePosition
-     * @throws Exception
+     * @throws PluginException
      */
     public function getTrapPosition(int $slot, pocketLevel $level): GamePosition {
         $data = $this->data['trapspawn'][$slot] ?? null;
 
         if ($data == null) {
-            throw new Exception('Trap slot ' . $slot . ' not found');
+            throw new PluginException('Trap slot ' . $slot . ' not found');
         }
 
         /** @var GamePosition $pos */
@@ -103,6 +104,14 @@ class Level extends \gameapi\arena\Level {
     }
 
     /**
+     * @param int $slot
+     * @return bool
+     */
+    public function isCheckpoint(int $slot): bool {
+        return isset($this->data['checkpoints'][$slot]);
+    }
+
+    /**
      * @param pocketLevel $world
      */
     public function handleSpawns(pocketLevel $world): void {
@@ -111,13 +120,19 @@ class Level extends \gameapi\arena\Level {
 
             $text = $tile->getLine(0);
 
-            if ($text != 'TRAP' && $text != 'SPAWN') continue;
+            if ($text != 'TRAP' && $text != 'SPAWN' && $text != 'CHECKPOINT') continue;
 
             if ($text == 'TRAP') {
                 $this->addTrapPosition((int)$tile->getLine(1), $tile->asVector3());
-            } else {
+            } else if($text == 'SPAWN') {
                 $this->addSlotPosition(1, Location::fromObject($tile->asVector3(), $world));
+            } else {
+                $line = explode(':', $tile->getLine(1));
+
+                $this->addCheckpointPosition((int)$line[0], (int)$line[1], $tile->asVector3());
             }
+
+            $tile->getLevelNonNull()->setBlock($tile->asVector3(), Block::get(0));
         }
     }
 
@@ -157,6 +172,7 @@ class Level extends \gameapi\arena\Level {
      * @param int $id
      * @param int $damage
      * @param bool $replaceAll
+     * @noinspection PhpUnusedParameterInspection
      */
     public function handleUpdateBlocks(pocketLevel $world, Vector3 $pos1, Vector3 $pos2, int $id = 0, int $damage = 0, bool $replaceAll = false): void {
         /** @var array<string, Block> $data */

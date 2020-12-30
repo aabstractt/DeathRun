@@ -13,6 +13,7 @@ use gameapi\arena\Level;
 use gameapi\arena\task\GameCountDownUpdateTask;
 use pocketmine\block\Block;
 use pocketmine\math\Vector3;
+use pocketmine\tile\Sign;
 
 class Arena extends ArenaListener {
 
@@ -70,9 +71,37 @@ class Arena extends ArenaListener {
     }
 
     public function startGame(): void {
-        foreach ($this->getAllPlayers() as $player) $player->setImmobile(false);
+        /** @var Vector3[] $positions */
+        $positions = [];
 
         $world = $this->getWorld();
+
+        if ($world == null) return;
+
+        foreach ($world->getTiles() as $tile) {
+            if (!$tile instanceof Sign) continue;
+
+            if ($tile->getLine(0) != 'START' && $tile->getLine(0) != 'STOP') continue;
+
+            $positions[] = $tile->asVector3();
+        }
+
+        $pos1 = $positions[0];
+        $pos2 = $positions[1];
+
+        for ($x = min($pos1->getX(), $pos2->getX()); $x <= max($pos1->getX(), $pos2->getX()); ++$x) {
+            for ($y = min($pos1->getY(), $pos2->getY()); $y <= max($pos1->getY(), $pos2->getY()); ++$y) {
+                for ($z = min($pos1->getZ(), $pos2->getZ()); $z <= max($pos1->getZ(), $pos2->getZ()); ++$z) {
+                    $block = $world->getBlockAt((int)$x, (int)$y, (int)$z);
+
+                    if ($block->getId() != Block::STAINED_HARDENED_CLAY && $block->getId() != Block::STAINED_GLASS) continue;
+
+                    $world->setBlockIdAt((int)$x, (int)$y, (int)$z, 0);
+                }
+            }
+        }
+
+        foreach ($this->getAllPlayers() as $player) $player->setImmobile(false);
 
         if ($world != null) $this->traps = $this->getLevel()->loadTraps($world);
 
