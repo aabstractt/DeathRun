@@ -8,7 +8,6 @@ use deathrun\arena\Arena as CustomArena;
 use deathrun\arena\Level as CustomLevel;
 use deathrun\listener\PlayerListener;
 use deathrun\player\Player as CustomPlayer;
-use deathrun\provider\TargetOffline as CustomTargetOffline;
 use gameapi\arena\Arena;
 use gameapi\arena\Level;
 use gameapi\Game;
@@ -56,6 +55,6 @@ class DeathRun extends Game {
      * @return TargetOffline
      */
     public function generateNewTargetOffline(array $data): TargetOffline {
-        return new CustomTargetOffline($data);
+        return new TargetOffline($data);
     }
 }
