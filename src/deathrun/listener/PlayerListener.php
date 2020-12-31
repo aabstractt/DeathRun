@@ -58,14 +58,25 @@ class PlayerListener implements Listener {
             return;
         }
 
-        if ($player->hasCoolDownTrap()) return;
+        if ($name == 'Leap') {
+            if ($player->hasLeapCountDown()) return;
+
+            $player->setTrapCountDown(true);
+
+            DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use($player): void {
+                $player->setLeapCountDown();
+            }), 20 * 30);
+            return;
+        }
+
+        if ($player->hasTrapCountDown()) return;
 
         $arena->handleActivateTrap($player->getStep());
 
-        $player->setCoolDownTrap(true);
+        $player->setTrapCountDown(true);
 
         DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use($player): void {
-            $player->setCoolDownTrap();
-        }), 20 * 5);
+            $player->setTrapCountDown();
+        }), 20 * 30);
     }
 }

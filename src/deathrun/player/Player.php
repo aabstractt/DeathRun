@@ -8,9 +8,6 @@ use deathrun\arena\Arena as CustomArena;
 use Exception;
 use gameapi\arena\Arena;
 use gameapi\player\Player as mainPlayer;
-use pocketmine\item\Item;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\StringTag;
 use pocketmine\utils\TextFormat;
 
 class Player extends mainPlayer {
@@ -22,7 +19,9 @@ class Player extends mainPlayer {
     /** @var int */
     private $currentCheckpoint = 0;
     /** @var bool */
-    private $cooldownTrap = false;
+    private $leapCountDown = false;
+    /** @var bool */
+    private $trapCountDown = false;
 
     /**
      * @return CustomArena
@@ -83,18 +82,29 @@ class Player extends mainPlayer {
         return $this->isRunner() ? $this->currentCheckpoint + 1 : $this->currentTrap;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasCoolDownTrap(): bool {
-        return $this->cooldownTrap;
+    public function hasLeapCountDown(): bool {
+        return $this->leapCountDown;
     }
 
     /**
      * @param bool $value
      */
-    public function setCoolDownTrap(bool $value = false): void {
-        $this->cooldownTrap = $value;
+    public function setLeapCountDown(bool $value = false): void {
+        $this->leapCountDown = $value;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasTrapCountDown(): bool {
+        return $this->trapCountDown;
+    }
+
+    /**
+     * @param bool $value
+     */
+    public function setTrapCountDown(bool $value = false): void {
+        $this->trapCountDown = $value;
     }
 
     /**
@@ -126,6 +136,14 @@ class Player extends mainPlayer {
 
     public function finishPlayer(): void {
         $this->remove();
+
+        $arena = $this->getArena();
+
+        $arena->increasePlayersFinished();
+
+        $this->getGeneralPlayer()->sendTitle('&a¡Felicidades!', '&aHas quedado en el puesto numero ' . $arena->getPlayersFinished());
+
+        $arena->broadcastMessage('&a' . $this->getName() . ' a quedado en el ' . $arena->getPlayersFinished() . ' lugar');
 
         $this->getGeneralPlayer()->setGamemode(3);
     }

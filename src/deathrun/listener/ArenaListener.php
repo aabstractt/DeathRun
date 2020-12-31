@@ -42,21 +42,21 @@ abstract class ArenaListener extends \gameapi\listener\ArenaListener {
 
         $block = $instance->getLevelNonNull()->getBlock($instance->asPosition());
 
-        if ($block instanceof Water) $player->sendMessage($block->getId() . ' > ' . $block->getName());
-
         if ($block instanceof Water) {
             $player->executeTeleport();
 
             return;
         }
 
-        if ($block->getId() == Block::REDSTONE_BLOCK) {
+        if ($block->getId() == Block::REDSTONE_BLOCK ||
+            $instance->getLevelNonNull()->getBlock($instance->subtract(0, 1))->getId() == Block::REDSTONE_BLOCK) {
             $instance->addEffect(new EffectInstance(Effect::getEffect(Effect::SPEED), 20*5, 4, false));
 
             return;
         }
 
-        if ($block->getId() == Block::EMERALD_BLOCK) {
+        if ($block->getId() == Block::EMERALD_BLOCK ||
+            $instance->getLevelNonNull()->getBlock($instance->subtract(0, 1))->getId() == Block::EMERALD_BLOCK) {
             $instance->addEffect(new EffectInstance(Effect::getEffect(Effect::JUMP_BOOST), 20*5, 3));
 
             return;

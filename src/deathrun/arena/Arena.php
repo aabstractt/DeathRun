@@ -23,6 +23,8 @@ class Arena extends ArenaListener {
 
     /** @var array<int, Trap> */
     private $traps = [];
+    /** @var int */
+    private $playersFinished = 0;
 
     public function bootGame(): void {
         $this->scheduleRepeatingTask(new GameCountDownUpdateTask('game_count_down_update', $this, 5, 10, 15));
@@ -110,8 +112,16 @@ class Arena extends ArenaListener {
 
             $instance = $player->getGeneralPlayer();
 
+            $instance->getInventory()->clearAll();
+            $instance->getArmorInventory()->clearAll();
+
             if ($player->isRunner()) {
-                $instance->getInventory()->setItem(0, (Item::get(Item::FEATHER))->setCustomName(TextFormat::RESET . TextFormat::YELLOW . 'Leap'));
+                $item = Item::get(Item::FEATHER);
+
+                $item->setCustomName(TextFormat::RESET . TextFormat::YELLOW . 'Leap');
+                $item->setCustomBlockData(new CompoundTag('', [new StringTag('Name', 'Leap')]));
+
+                $instance->getInventory()->setItem(0, $item);
             } else {
                 $item = Item::get(Item::STICK);
 
@@ -134,11 +144,24 @@ class Arena extends ArenaListener {
 
                 for ($i = 2; $i < 9; $i++) $instance->getInventory()->setItem($i, $item);
             }
+
+            $instance->getInventory()->sendContents($instance);
         }
 
         if ($world != null) $this->traps = $this->getLevel()->loadTraps($world);
 
         $this->scheduleRepeatingTask(new GameMatchUpdateTask('game_match_update', $this));
+    }
+
+    public function increasePlayersFinished(): void {
+        $this->playersFinished++;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPlayersFinished(): int {
+        return $this->playersFinished;
     }
 
     /**

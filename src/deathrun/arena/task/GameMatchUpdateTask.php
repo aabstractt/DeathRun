@@ -11,11 +11,14 @@ class GameMatchUpdateTask extends GameUpdateTask {
 
     /** @var int */
     protected $timePassed = 0;
+    /** @var int */
+    protected $cooldown = 60;
 
     /**
      * Action executed when the task run
      */
     public function run(): void {
+        /** @var Arena $arena */
         $arena = $this->arena;
 
         if ($arena == null) {
@@ -28,12 +31,28 @@ class GameMatchUpdateTask extends GameUpdateTask {
             return;
         }
 
-        if (count($arena->getAllPlayers()) <= 1) {
+        if (count($arena->getPlayers()) <= 1) {
             $this->cancel();
 
             $arena->finish($arena->getSpectators());
 
             return;
+        }
+
+        if ($arena->getPlayersFinished() >= 3) {
+            if (in_array($this->cooldown, [30, 15]) || $this->cooldown <= 5) {
+                $arena->broadcastMessage('&cQuedan ' . $this->cooldown . ' para que acabe la partida');
+            }
+
+            if ($this->cooldown == 0) {
+                $this->cancel();
+
+                $arena->finish($arena->getSpectators());
+
+                return;
+            }
+
+            $this->cooldown--;
         }
 
         $this->handleUpdateScoreboard();
