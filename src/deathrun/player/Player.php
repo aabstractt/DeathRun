@@ -20,8 +20,8 @@ class Player extends mainPlayer {
     private $currentCheckpoint = 0;
     /** @var bool */
     private $leapCountDown = false;
-    /** @var bool */
-    private $trapCountDown = false;
+    /** @var int[] */
+    private $trapCountDown = [];
 
     /**
      * @return CustomArena
@@ -94,17 +94,25 @@ class Player extends mainPlayer {
     }
 
     /**
+     * @param int $trap
      * @return bool
      */
-    public function hasTrapCountDown(): bool {
-        return $this->trapCountDown;
+    public function hasTrapCountDown(int $trap): bool {
+        return in_array($trap, $this->trapCountDown, true);
     }
 
     /**
-     * @param bool $value
+     * @param int $trap
      */
-    public function setTrapCountDown(bool $value = false): void {
-        $this->trapCountDown = $value;
+    public function setTrapCountDown(int $trap): void {
+        $this->trapCountDown[] = $trap;
+    }
+
+    /**
+     * @param int $trap
+     */
+    public function removeTrapCountDown(int $trap): void {
+        $this->trapCountDown = array_diff($this->trapCountDown, [$trap]);
     }
 
     /**

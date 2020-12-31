@@ -223,7 +223,7 @@ class Level extends \gameapi\arena\Level {
                         (new Explosion(Position::fromObject($block->add(0, 0.98 / 2), $block->getLevelNonNull()), 4, $block))->explodeB();
 
                         foreach ($players as $player) {
-                            $player->remove(false);
+                            $player->executeTeleport();
                         }
 
                         return;

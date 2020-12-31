@@ -53,11 +53,11 @@ class PlayerListener implements Listener {
 
             $direction = $player->getGeneralPlayer()->getDirectionVector();
 
-            $player->getGeneralPlayer()->knockBack($player->getGeneralPlayer(), 0, $direction->getFloorX(), $direction->getFloorZ(), 5);
+            $player->getGeneralPlayer()->knockBack($player->getGeneralPlayer(), 0, $direction->getFloorX(), $direction->getFloorZ(), 1);
 
             $player->sendMessage('Cool');
 
-            $player->setTrapCountDown(true);
+            $player->setLeapCountDown(true);
 
             DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use($player): void {
                 $player->setLeapCountDown();
@@ -75,14 +75,16 @@ class PlayerListener implements Listener {
             return;
         }
 
-        if ($player->hasTrapCountDown()) return;
+        $step = $player->getStep();
 
-        $arena->handleActivateTrap($player->getStep());
+        if ($player->hasTrapCountDown($step)) return;
 
-        $player->setTrapCountDown(true);
+        $arena->handleActivateTrap($step);
 
-        DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use($player): void {
-            $player->setTrapCountDown();
+        $player->setTrapCountDown($step);
+
+        DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use($player, $step): void {
+            $player->removeTrapCountDown($step);
         }), 20 * 30);
     }
 }
