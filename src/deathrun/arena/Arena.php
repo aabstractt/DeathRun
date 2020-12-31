@@ -64,12 +64,42 @@ class Arena extends ArenaListener {
     public function start(bool $started = true): void {
         if (!$started) {
             /** @var Player|null $player */
-            $player = $this->getPlayer((string) array_rand($this->getPlayers()));
+            $player = $this->getPlayer((string)array_rand($this->getPlayers()));
 
             if ($player !== null) {
                 $player->setRunning();
 
                 $player->setImmobile();
+            }
+        } else {
+            /** @var Vector3[] $positions */
+            $positions = [];
+
+            $world = $this->getWorld();
+
+            if ($world == null) return;
+
+            foreach ($world->getTiles() as $tile) {
+                if (!$tile instanceof Sign) continue;
+
+                if ($tile->getLine(0) != 'START' && $tile->getLine(0) != 'STOP') continue;
+
+                $positions[] = $tile->asVector3();
+            }
+
+            $pos1 = $positions[0];
+            $pos2 = $positions[1];
+
+            for ($x = min($pos1->getX(), $pos2->getX()); $x <= max($pos1->getX(), $pos2->getX()); ++$x) {
+                for ($y = min($pos1->getY(), $pos2->getY()); $y <= max($pos1->getY(), $pos2->getY()); ++$y) {
+                    for ($z = min($pos1->getZ(), $pos2->getZ()); $z <= max($pos1->getZ(), $pos2->getZ()); ++$z) {
+                        $block = $world->getBlockAt((int)$x, (int)$y, (int)$z);
+
+                        if ($block->getId() != Block::STAINED_HARDENED_CLAY && $block->getId() != Block::STAINED_GLASS) continue;
+
+                        $world->setBlockIdAt((int)$x, (int)$y, (int)$z, 0);
+                    }
+                }
             }
         }
 
@@ -77,37 +107,12 @@ class Arena extends ArenaListener {
     }
 
     public function startGame(): void {
-        /** @var Vector3[] $positions */
-        $positions = [];
-
         $world = $this->getWorld();
 
         if ($world == null) return;
 
-        foreach ($world->getTiles() as $tile) {
-            if (!$tile instanceof Sign) continue;
-
-            if ($tile->getLine(0) != 'START' && $tile->getLine(0) != 'STOP') continue;
-
-            $positions[] = $tile->asVector3();
-        }
-
-        $pos1 = $positions[0];
-        $pos2 = $positions[1];
-
-        for ($x = min($pos1->getX(), $pos2->getX()); $x <= max($pos1->getX(), $pos2->getX()); ++$x) {
-            for ($y = min($pos1->getY(), $pos2->getY()); $y <= max($pos1->getY(), $pos2->getY()); ++$y) {
-                for ($z = min($pos1->getZ(), $pos2->getZ()); $z <= max($pos1->getZ(), $pos2->getZ()); ++$z) {
-                    $block = $world->getBlockAt((int)$x, (int)$y, (int)$z);
-
-                    if ($block->getId() != Block::STAINED_HARDENED_CLAY && $block->getId() != Block::STAINED_GLASS) continue;
-
-                    $world->setBlockIdAt((int)$x, (int)$y, (int)$z, 0);
-                }
-            }
-        }
-
         foreach ($this->getPlayers() as $player) {
+            $player->setEnergized();
             $player->setImmobile(false);
 
             $instance = $player->getGeneralPlayer();

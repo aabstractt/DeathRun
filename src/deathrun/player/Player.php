@@ -174,5 +174,7 @@ class Player extends mainPlayer {
         parent::setMatchPlayerAttributes();
 
         $this->setDefaultPlayerAttributes();
+
+        $this->setEnergized();
     }
 }
