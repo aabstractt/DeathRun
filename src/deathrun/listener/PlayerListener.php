@@ -11,6 +11,7 @@ use Exception;
 use gameapi\Game;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\scheduler\ClosureTask;
 
 class PlayerListener implements Listener {
@@ -42,6 +43,8 @@ class PlayerListener implements Listener {
         $nbt = $item->getCustomBlockData();
 
         if ($nbt == null) return;
+
+        if (!$nbt->hasTag('Name', StringTag::class)) return;
 
         $name = $nbt->getString('Name');
 
