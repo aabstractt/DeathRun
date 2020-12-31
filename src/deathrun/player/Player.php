@@ -141,7 +141,7 @@ class Player extends mainPlayer {
 
         $arena->increasePlayersFinished();
 
-        $this->getGeneralPlayer()->sendTitle('&a¡Felicidades!', '&aHas quedado en el puesto numero ' . $arena->getPlayersFinished());
+        $this->sendTitle('&a¡Felicidades!', '&aHas quedado en el puesto numero ' . $arena->getPlayersFinished());
 
         $arena->broadcastMessage('&a' . $this->getName() . ' a quedado en el ' . $arena->getPlayersFinished() . ' lugar');
 

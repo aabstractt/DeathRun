@@ -10,6 +10,8 @@ use pocketmine\block\Block;
 use pocketmine\block\Water;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
+use pocketmine\entity\projectile\Arrow;
+use pocketmine\entity\projectile\Projectile;
 use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\item\Item;
 use pocketmine\level\Location;
@@ -135,5 +137,22 @@ abstract class ArenaListener extends \gameapi\listener\ArenaListener {
      */
     public function handleEntityDamageByPlayer(pocketPlayer $player, ?pocketPlayer $target, float $finalDamage): bool {
         return true;
+    }
+
+    /**
+     * @param pocketPlayer $player
+     * @param Projectile $projectile
+     */
+    public function handleEntityDamageByProjectile(pocketPlayer $player, Projectile $projectile): void {
+        if (!$this->isStarted()) return;
+
+        /** @var Player $player */
+        $player = $this->getPlayer($player->getName());
+
+        if ($player == null) return;
+
+        if (!$projectile instanceof Arrow) return;
+
+        $player->executeTeleport();
     }
 }

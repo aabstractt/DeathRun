@@ -61,6 +61,10 @@ class PlayerListener implements Listener {
         if ($name == 'Leap') {
             if ($player->hasLeapCountDown()) return;
 
+            $direction = $player->getGeneralPlayer()->getDirectionVector();
+
+            $player->getGeneralPlayer()->knockBack($player->getGeneralPlayer(), 0, $direction->getFloorX(), $direction->getFloorZ());
+
             $player->setTrapCountDown(true);
 
             DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use($player): void {
