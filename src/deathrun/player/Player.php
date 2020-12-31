@@ -22,6 +22,8 @@ class Player extends mainPlayer {
     private $leapCountDown = false;
     /** @var int[] */
     private $trapCountDown = [];
+    /** @var int */
+    private $deaths = 0;
 
     /**
      * @return CustomArena
@@ -136,10 +138,19 @@ class Player extends mainPlayer {
                 return;
             }
 
+            $this->deaths++;
+
             $this->teleport($pos);
         } catch (Exception $e) {
             $this->getGeneralPlayer()->kick($e->getMessage());
         }
+    }
+
+    /**
+     * @return int
+     */
+    public function getDeaths(): int {
+        return $this->deaths;
     }
 
     public function finishPlayer(): void {
