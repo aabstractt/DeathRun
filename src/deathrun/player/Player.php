@@ -124,7 +124,7 @@ class Player extends mainPlayer {
         }
     }
 
-    private function finishPlayer(): void {
+    public function finishPlayer(): void {
         $this->remove();
 
         $this->getGeneralPlayer()->setGamemode(3);
@@ -156,32 +156,5 @@ class Player extends mainPlayer {
         parent::setMatchPlayerAttributes();
 
         $this->setDefaultPlayerAttributes();
-
-        $instance = $this->getGeneralPlayer();
-
-        if ($this->isRunner()) {
-            $instance->getInventory()->setItem(0, (Item::get(Item::FEATHER))->setCustomName(TextFormat::RESET . TextFormat::YELLOW . 'Leap'));
-        } else {
-            $item = Item::get(Item::STICK);
-
-            $item->setCustomName(TextFormat::colorize('&r&cLast Trap'));
-            $item->setCustomBlockData(new CompoundTag("", [new StringTag('Name', 'Last')]));
-
-            $instance->getInventory()->setItem(0, $item);
-
-            $item = Item::get(Item::FEATHER);
-
-            $item->setCustomName(TextFormat::colorize('&r&aNext Trap'));
-            $item->setCustomBlockData(new CompoundTag('', [new StringTag('Name', 'Next')]));
-
-            $instance->getInventory()->setItem(1, $item);
-
-            $item = Item::get(Item::SLIME_BALL);
-
-            $item->setCustomName(TextFormat::colorize('&r&aActivate Trap'));
-            $item->setCustomBlockData(new CompoundTag('', [new StringTag('Name', 'Activate')]));
-
-            for ($i = 2; $i < 9; $i++) $instance->getInventory()->setItem($i, $item);
-        }
     }
 }

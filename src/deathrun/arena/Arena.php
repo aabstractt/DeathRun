@@ -12,8 +12,12 @@ use Exception;
 use gameapi\arena\Level;
 use gameapi\arena\task\GameCountDownUpdateTask;
 use pocketmine\block\Block;
+use pocketmine\item\Item;
 use pocketmine\math\Vector3;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\tile\Sign;
+use pocketmine\utils\TextFormat;
 
 class Arena extends ArenaListener {
 
@@ -101,7 +105,36 @@ class Arena extends ArenaListener {
             }
         }
 
-        foreach ($this->getAllPlayers() as $player) $player->setImmobile(false);
+        foreach ($this->getPlayers() as $player) {
+            $player->setImmobile(false);
+
+            $instance = $player->getGeneralPlayer();
+
+            if ($player->isRunner()) {
+                $instance->getInventory()->setItem(0, (Item::get(Item::FEATHER))->setCustomName(TextFormat::RESET . TextFormat::YELLOW . 'Leap'));
+            } else {
+                $item = Item::get(Item::STICK);
+
+                $item->setCustomName(TextFormat::colorize('&r&cLast Trap'));
+                $item->setCustomBlockData(new CompoundTag("", [new StringTag('Name', 'Last')]));
+
+                $instance->getInventory()->setItem(0, $item);
+
+                $item = Item::get(Item::FEATHER);
+
+                $item->setCustomName(TextFormat::colorize('&r&aNext Trap'));
+                $item->setCustomBlockData(new CompoundTag('', [new StringTag('Name', 'Next')]));
+
+                $instance->getInventory()->setItem(1, $item);
+
+                $item = Item::get(Item::SLIME_BALL);
+
+                $item->setCustomName(TextFormat::colorize('&r&aActivate Trap'));
+                $item->setCustomBlockData(new CompoundTag('', [new StringTag('Name', 'Activate')]));
+
+                for ($i = 2; $i < 9; $i++) $instance->getInventory()->setItem($i, $item);
+            }
+        }
 
         if ($world != null) $this->traps = $this->getLevel()->loadTraps($world);
 

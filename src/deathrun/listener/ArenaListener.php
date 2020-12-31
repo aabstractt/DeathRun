@@ -44,22 +44,19 @@ abstract class ArenaListener extends \gameapi\listener\ArenaListener {
 
         if ($block instanceof Water) $player->sendMessage($block->getId() . ' > ' . $block->getName());
 
-        if ($block instanceof Water ||
-            $instance->getLevelNonNull()->getBlock($instance->subtract(0, 1)) instanceof Water) {
+        if ($block instanceof Water) {
             $player->executeTeleport();
 
             return;
         }
 
-        if ($block->getId() == Block::REDSTONE_BLOCK ||
-            $instance->getLevelNonNull()->getBlock($instance->subtract(0, 1))->getId() == Block::REDSTONE_BLOCK) {
+        if ($block->getId() == Block::REDSTONE_BLOCK) {
             $instance->addEffect(new EffectInstance(Effect::getEffect(Effect::SPEED), 20*5, 4, false));
 
             return;
         }
 
-        if ($block->getId() == Block::EMERALD_BLOCK ||
-            $instance->getLevelNonNull()->getBlock($instance->subtract(0, 1))->getId() == Block::EMERALD_BLOCK) {
+        if ($block->getId() == Block::EMERALD_BLOCK) {
             $instance->addEffect(new EffectInstance(Effect::getEffect(Effect::JUMP_BOOST), 20*5, 3));
 
             return;
@@ -70,7 +67,11 @@ abstract class ArenaListener extends \gameapi\listener\ArenaListener {
         /** @var Level $level */
         $level = $this->getLevel();
 
-        if (!$level->isCheckpoint($player->getStep())) return;
+        if (!$level->isCheckpoint($player->getStep())) {
+            $player->finishPlayer();
+
+            return;
+        }
 
         $pos1 = $level->getCheckpointPosition($player->getStep(), 1)->get();
         $pos2 = $level->getCheckpointPosition($player->getStep(), 2)->get();
