@@ -55,8 +55,6 @@ class PlayerListener implements Listener {
 
             $player->getGeneralPlayer()->knockBack($player->getGeneralPlayer(), 0, $direction->getFloorX(), $direction->getFloorZ(), 1);
 
-            $player->sendMessage('Cool');
-
             $player->setLeapCountDown(true);
 
             DeathRun::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use($player): void {
