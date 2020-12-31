@@ -70,9 +70,9 @@ class GameMatchUpdateTask extends GameUpdateTask {
             if (!$player->isConnected()) continue;
 
             if (!$player->isRunner()) {
-                $message = '&bTrap &7&l> ' . ($player->hasTrapCountDown($player->getStep()) ? '&cOn Cooldown' : '&aReady');
+                $message = '&bTrap &7&l» &r' . ($player->hasTrapCountDown($player->getStep()) ? '&cOn Cooldown' : '&aReady');
             } else {
-                $message = ($player->hasLeapCountDown() ? '&aLeap Recharging...' : '') . "\n'&bRunner &7&l> &r&6" . $player->getDeaths() . ' Deaths &7> &a' . ($player->getStep() - 1) . '/&2' . count($arena->getLevel()->getCheckpoints()) . ' &aCheckpoints';
+                $message = ($player->hasLeapCountDown() ? "&aLeap Recharging...\n" : '') . "&bRunner &7&l» &r&6" . $player->getDeaths() . ' Deaths &7> &a' . ($player->getStep() - 1) . '/&2' . count($arena->getLevel()->getCheckpoints()) . ' &aCheckpoints';
             }
 
             $player->sendTip($message);

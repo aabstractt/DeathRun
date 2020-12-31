@@ -53,7 +53,7 @@ class PlayerListener implements Listener {
 
             $direction = $player->getGeneralPlayer()->getDirectionVector();
 
-            $player->getGeneralPlayer()->knockBack($player->getGeneralPlayer(), 0, $direction->getFloorX(), $direction->getFloorZ(), 1.5);
+            $player->getGeneralPlayer()->knockBack($player->getGeneralPlayer(), 0, $direction->getFloorX(), $direction->getFloorZ(), 1);
 
             $player->setLeapCountDown(true);
 

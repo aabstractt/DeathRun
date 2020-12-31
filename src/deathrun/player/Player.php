@@ -139,6 +139,8 @@ class Player extends mainPlayer {
             }
 
             $this->deaths++;
+			
+			$this->getGeneralPlayer()->removeAllEffects();
 
             $this->teleport($pos);
         } catch (Exception $e) {
